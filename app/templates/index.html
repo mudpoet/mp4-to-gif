@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MP4 to GIF Converter</title>
+    <style>
+        .drop-zone {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+        }
+        .options {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>MP4 to GIF Converter</h1>
+    <form id="convertForm" enctype="multipart/form-data">
+        <div class="drop-zone" id="dropZone">
+            Drag & Drop MP4 File Here or Click to Upload
+            <input type="file" id="fileInput" name="file" accept="video/mp4" hidden>
+        </div>
+        
+        <div class="options">
+            <label>Loop Count (0 = infinite): <input type="number" name="loop" value="0" min="0"></label><br>
+            <label>Start Time (HH:MM:SS.ms): <input type="text" name="start_time" value="00:00:00.000"></label><br>
+            <label>End Time (HH:MM:SS.ms): <input type="text" name="end_time"></label><br>
+            <label>FPS: <input type="text" name="fps" value="source" placeholder="source"></label>
+        </div>
+        
+        <button type="submit">Convert</button>
+    </form>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const form = document.getElementById('convertForm');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => e.preventDefault());
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileInput.files = e.dataTransfer.files;
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            
+            const response = await fetch('/convert', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'converted.gif';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
